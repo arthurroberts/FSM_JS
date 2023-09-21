@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<title> Finite Automata </title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+<style>
+dialog[open] {
+  position: sticky;
+  background-color: rgb(199, 205, 207);
+  top: 10px;
+} 
+
+
+</style>
+
+<html lang="en">
+    <head>
+      <meta charset="UTF-8">        
+    </head>
+    <body>
+     <h2>Finite Automata</h2>
+     <ol>
+      <li>
+     <b>Ctrl+Click</b> - edit state. Ctrl-Click inside existing state to edit it. Ctrl-Click outside existing state to make new one.<br>  
+     </li>
+     <li>
+     <b>Shift+Click</b> - edit existing transition (click arrow) or
+      make new transition (click inside state)<br>
+   </li>
+   </ol>
+
+    <label for="input_seq">Input sequence: </label>
+    <input type="text" name="input_seq" id="input_seq" > 
+    <label for="output_seq">Output sequence: </label>
+    <input type="text" name="output_seq" id="output_seq" > 
+    <button id="step" type="submit" onClick="fsm_step()">Step</button><br>
+    <hr>
+    <button id="new_fsm" type="submit" onClick="new_fsm()">New fsm</button>
+    <button id="stream" type="submit" onClick="save_fsm()">Save fsm</button>
+    <label for="picker">Load local file: </label>
+    <input type="file" id="picker">
+    <hr>
+    <div id="dialogs_anchor">
+      <div id = "new_state_dlg_anchor"></div>
+      <div id = "edit_state_dlg_anchor"></div>
+      <div id = "new_tran_dlg_anchor"></div>
+      <div id = "edit_tran_dlg_anchor"></div>
+    </div>
+   
+    <div id ='svg_anchor'> </div>
+
+    
+    </body>
+
+   <script src="lib_svg.js">  </script>
+   <script src="fsm.js">  </script>
+   <script src="fsm_gui.js">  </script>
+   <script src="gui_dialogs.js">  </script>
+   
+
+   <script>
+
+      // extract querry from url
+      const urlParams = new URLSearchParams(window.location.search);
+      let querryParam = 'none';
+      querryParam = urlParams.get('file');
+      console.log('myParam=' + querryParam);
+      document.getElementById('input_seq').value="  on   off on off on on";
+      if (querryParam == null){ // load default 
+        init_fsm();
+      } else{ // load file from server
+         let file_name = querryParam;
+         load_server_local(file_name); //async draws fsm
+      }
+
+
+      function fsm_step(){ // consumes one input from input string
+         draw_fsm(svg_fsm);
+         let inp_seq = document.getElementById('input_seq').value;
+         console.log('inp_seq='+inp_seq);
+         //split string by whitespace
+         let sarray = inp_seq.split(/\s+/);
+         // take out all whitespace elements
+         const filtArray = sarray.filter(str => str.trim().length > 0);
+         console.log('filtArray[0]='+filtArray[0]);
+         fsm.step(filtArray[0]);
+         if (fsm.current_output!==undefined){
+           //let out_seq = document.getElementById('output_seq').value + fsm.current_output;
+           document.getElementById('output_seq').value += fsm.current_output;
+         } 
+        // if (fsm.current_state_output!==undefined){
+            //let out_seq = document.getElementById('output_seq').value + fsm.current_state_output;
+        //    document.getElementById('output_seq').value += fsm.current_state_output;
+        // }
+         // take first element out and display the result
+         let new_seq = '';
+         for (let i = 1 ; i< filtArray.length ; i++){
+             new_seq = new_seq + filtArray[i]+ ' ';
+         }
+         document.getElementById('input_seq').value = new_seq;
+         draw_fsm(svg_fsm);
+      }
+
+    </script>
+
+</html>
